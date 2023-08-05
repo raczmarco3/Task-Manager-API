@@ -28,7 +28,7 @@ class TaskController extends AbstractController
     {
         $content = $request->getContent();
 
-        //if the content is empty or not a valid json
+        //check if the content is empty or not a valid json
         if(empty($content) || json_decode($content) === null) {
             return new JsonResponse(["message" => "Invalid parameters."], 400);
         }
@@ -51,7 +51,8 @@ class TaskController extends AbstractController
         return $taskService->addTask($taskRequestDto, $taskRepository, $entityManager);
     }
 
-    public function printValidationErrors($errors, $serializer) {
+    public function printValidationErrors($errors, $serializer)
+    {
         $formatedViolationList = [];
 
         for ($i = 0; $i < $errors->count(); $i++) {

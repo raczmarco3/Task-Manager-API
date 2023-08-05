@@ -12,8 +12,10 @@ class TaskRequestDto
         maxMessage: "This value cannot be longer than {{ limit }} characters!",
     )]
     private string $name;
+
     #[Assert\NotBlank]
     private string $description;
+
     #[Assert\NotBlank]
     #[Assert\DateTime(format: "Y-m-d H:i")]
     private string $deadline;
