@@ -1,0 +1,215 @@
+openapi: 3.0.0
+info:
+  title: Task-Manager-API
+  description: 'An API using the Symfony framework (6.3) that allows users to create, modify, and delete tasks. The API should communicate with the client application in JSON format. The application should provide the ability to list, create, modify, and delete tasks.'
+  version: 1.0.0
+servers:
+  - url: localhost:8000/api
+paths:
+  /api/register:
+    post:
+      tags:
+        - User actions
+      summary: localhost:8000/api/register
+      description: User registration.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: username
+                password: password
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Registration successful!
+        '403':
+          description: User already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: This user already exists!
+  /api/login:
+    post:
+      tags:
+        - User actions
+      summary: localhost:8000/api/login
+      description: User login.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: username
+                password: password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Login successful.
+        '401':
+          description: Wrong credentials.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                error: Invalid credentials.
+  /api/logout:
+    get:
+      tags:
+        - User actions
+      summary: localhost:8000/api/logout
+      description: Logout.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: You have logged out!
+  /api/task/add:
+    post:
+      tags:
+        - Actions
+      summary: localhost:8000/api/task/add
+      description: Example of adding a task.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: {}
+      responses:
+        '201':
+          description: Successful creation
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Task created
+        '403':
+          description: Validation errors for task adding.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message:
+                  - name: This value should not be blank.
+                  - description: This value should not be blank.
+                  - deadline: This value should not be blank.
+  /api/task/get/all:
+    get:
+      tags:
+        - Actions
+      summary: localhost:8000/api/task/get/all
+      description: Get tasks example.
+      responses:
+        '200':
+          description: Query success
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - id: 4
+                  name: Name of the task
+                  description: Description of the task
+                  deadline: 2030-11-15 15:26
+                  closeDeadline: false
+                  expired: false
+                  updatedAt: 2023-08-06 14:51
+                - id: 5
+                  name: Name of the task
+                  description: Description of the task
+                  deadline: 2030-11-15 15:26
+                  closeDeadline: false
+                  expired: false
+                  updatedAt: 2023-08-06 14:57
+        '401':
+          description: Not authorized response because there is not logged in user
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: You are not authorized to do this action!
+  /api/task/delete/{id}:
+    delete:
+      tags:
+        - Actions
+      summary: localhost:8000/api/task/delete/{id}
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to delete
+      description: Delete example.
+      responses:
+        '200':
+          description: Successful delete.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Task deleted.
+        '401':
+          description: Not authorized response because there is not logged in user.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: You are not authorized to do this action!
+  /api/task/edit/{id}:
+    put:
+      tags:
+        - Actions
+      summary: localhost:8000/api/task/edit/{id}
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the task to edit
+      description: Edit example.
+      requestBody:
+        content: {}
+      responses:
+        '200':
+          description: Succesful edit.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Task edited
+        '400':
+          description: Invalid parameters error, when http body is empty.
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Invalid parameters.

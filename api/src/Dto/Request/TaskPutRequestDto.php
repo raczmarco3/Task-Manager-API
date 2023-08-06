@@ -6,6 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class TaskPutRequestDto
 {
+    #[Assert\NotBlank]
     #[Assert\Range(min: 1)]
     private $id;
 
