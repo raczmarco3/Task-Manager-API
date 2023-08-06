@@ -10,7 +10,6 @@
 4. Indicate upcoming due dates in the API response.
 5. Authentication and authorization for API endpoints.
 6. Clear error messages and status codes handling.
-7. Documentation of the application using Swagger.
 
 # Installation
 1. console: git clone https://github.com/raczmarco3/Task-Manager-API.git
