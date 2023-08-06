@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Dto\Request\TaskRequestDto;
 use App\Repository\TaskRepository;
 use App\Service\TaskService;
-use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,11 +43,19 @@ class TaskController extends AbstractController
         $deadline = $taskRequestDto->getDeadline();
         $date = new \DateTimeImmutable();
 
-        if($deadline<$date) {
+        if($deadline < $date) {
             return new JsonResponse(["message" => "Deadline should be in the future!"], 400);
         }
 
-        return $taskService->addTask($taskRequestDto, $taskRepository, $entityManager);
+        return $taskService->addTask($taskRequestDto, $entityManager);
+    }
+
+    /**
+     * @Route("/get/all", methods={"GET"})
+     */
+    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer, TaskService $taskService): JsonResponse
+    {
+        return $taskService->getTasks($taskRepository, $serializer);
     }
 
     public function printValidationErrors($errors, $serializer)
@@ -60,7 +67,7 @@ class TaskController extends AbstractController
             $formatedViolationList[] = array($violation->getPropertyPath() => $violation->getMessage());
         }
 
-        $msg = ["msg" => $formatedViolationList];
+        $msg = ["message" => $formatedViolationList];
         return JsonConverter::jsonResponse($serializer, $msg, 403);
     }
 }

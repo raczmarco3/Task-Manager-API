@@ -2,15 +2,18 @@
 
 namespace App\Service;
 
+use App\Converter\JsonConverter;
 use App\Dto\Request\TaskRequestDto;
+use App\Dto\Response\TaskResponseDto;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class TaskService
 {
-    public function addTask(TaskRequestDto $taskRequestDto, TaskRepository $taskRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function addTask(TaskRequestDto $taskRequestDto, EntityManagerInterface $entityManager): JsonResponse
     {
         //date and time of the creation
         $createdAt = new \DateTimeImmutable();
@@ -32,5 +35,52 @@ class TaskService
         }
 
         return new JsonResponse(["message" => "Task was not created due to a database error!"], 500);
+    }
+
+    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
+    {
+        $tasks = $taskRepository->findby([], ['deadline' => 'DESC']);
+
+        if(empty($tasks)) {
+            return new JsonResponse(["message" => "There are no tasks yet."], 404);
+        }
+
+        $taskResponseDtoArray = [];
+
+        foreach ($tasks as $task)
+        {
+            $cloeDeadline = false;
+            $expired = false;
+            //today's date
+            $date = new \DateTimeImmutable();
+
+            if($task->getDeadline() < $date) {
+                $expired = true;
+            }
+
+            if(!$expired) {
+                //get the difference between the 2 dates in days
+                $difference = $task->getDeadline()->diff($task->getCreatedAt());
+                $daysDifference = $difference->days;
+
+                //if the deadline is within a week then the deadline is close
+                if($daysDifference <= 7) {
+                    $cloeDeadline = true;
+                }
+            }
+
+            $taskResponseDto = new TaskResponseDto();
+
+            $taskResponseDto->setId($task->getId());
+            $taskResponseDto->setExpired($expired);
+            $taskResponseDto->setCloseDeadline($cloeDeadline);
+            $taskResponseDto->setDeadline($task->getDeadline());
+            $taskResponseDto->setName($task->getName());
+            $taskResponseDto->setDescription($task->getDescription());
+
+            $taskResponseDtoArray[] = $taskResponseDto;
+        }
+
+        return JsonConverter::jsonResponse($serializer, $taskResponseDtoArray, 200);
     }
 }
