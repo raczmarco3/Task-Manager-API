@@ -14,6 +14,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Converter\JsonConverter;
+use App\Entity\User;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 /**
  * @Route("/api/task")
@@ -24,8 +26,14 @@ class TaskController extends AbstractController
      * @Route("/add", methods={"POST"})
      */
     public function addTask(ValidatorInterface $validator, SerializerInterface $serializer,Request $request, TaskService $taskService,
-                            TaskRepository $taskRepository, EntityManagerInterface $entityManager): JsonResponse
+                            TaskRepository $taskRepository, EntityManagerInterface $entityManager, #[CurrentUser] ?User $user): JsonResponse
     {
+        //authorization
+        $response = $this->checkAuthorization($user);
+        if($response !== true) {
+            return $response;
+        }
+
         //check if the content is empty
         if(empty($request->getContent())) {
             return new JsonResponse(["message" => "Invalid parameters."], 400);
@@ -46,35 +54,56 @@ class TaskController extends AbstractController
             return new JsonResponse(["message" => "Deadline should be in the future!"], 400);
         }
 
-        return $taskService->addTask($taskPostRequestDto, $entityManager);
+        return $taskService->addTask($taskPostRequestDto, $entityManager, $user);
     }
 
     /**
      * @Route("/get/all", methods={"GET"})
      */
-    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer, TaskService $taskService): JsonResponse
+    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer, TaskService $taskService,
+                             #[CurrentUser] ?User $user): JsonResponse
     {
-        return $taskService->getTasks($taskRepository, $serializer);
+        //authorization
+        $response = $this->checkAuthorization($user);
+        if($response !== true) {
+            return $response;
+        }
+
+        return $taskService->getTasks($taskRepository, $serializer, $user);
     }
 
     /**
      * @Route("/delete/{id}", methods={"DELETE"})
      */
-    public function deleteTask($id, EntityManagerInterface $entityManager, TaskRepository $taskRepository, TaskService $taskService): JsonResponse
+    public function deleteTask($id, EntityManagerInterface $entityManager, TaskRepository $taskRepository,
+                               TaskService $taskService, #[CurrentUser] ?User $user): JsonResponse
     {
+        //authorization
+        $response = $this->checkAuthorization($user);
+        if($response !== true) {
+            return $response;
+        }
+
         if(!is_numeric($id)) {
             return new JsonResponse(["message" => "id must be a number!"], 400);
         }
 
-        return $taskService->deleteTask($taskRepository, $entityManager, $id);
+        return $taskService->deleteTask($taskRepository, $entityManager, $id, $user);
     }
 
     /**
      * @Route("/edit/{id}", methods={"PUT"})
      */
     public function editTask(ValidatorInterface $validator, SerializerInterface $serializer, Request $request,
-                             TaskRepository $taskRepository, EntityManagerInterface $entityManager, $id, TaskService $taskService): JsonResponse
+                             TaskRepository $taskRepository, EntityManagerInterface $entityManager, $id,
+                             TaskService $taskService, #[CurrentUser] ?User $user): JsonResponse
     {
+        //authorization
+        $response = $this->checkAuthorization($user);
+        if($response !== true) {
+            return $response;
+        }
+
         if(!is_numeric($id)) {
             return new JsonResponse(["message" => "id must be a number!"], 400);
         }
@@ -96,7 +125,7 @@ class TaskController extends AbstractController
             return new JsonResponse(["message" => "You don't have permission to edit this Task!"], 403);
         }
 
-        return $taskService->editTask($taskRepository, $entityManager, $taskPutRequestDto, $id);
+        return $taskService->editTask($taskRepository, $entityManager, $taskPutRequestDto, $id, $user);
     }
 
     public function printValidationErrors($errors, $serializer): JsonResponse
@@ -110,5 +139,14 @@ class TaskController extends AbstractController
 
         $msg = ["message" => $formatedViolationList];
         return JsonConverter::jsonResponse($serializer, $msg, 403);
+    }
+
+    public function checkAuthorization($user): JsonResponse|bool
+    {
+        if($user === null) {
+            return new JsonResponse(["message" => "You are not authorized to do this action!"], 401);
+        }
+
+        return true;
     }
 }

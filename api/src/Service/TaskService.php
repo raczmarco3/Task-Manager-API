@@ -7,6 +7,7 @@ use App\Dto\Request\TaskPostRequestDto;
 use App\Dto\Request\TaskPutRequestDto;
 use App\Dto\Response\TaskResponseDto;
 use App\Entity\Task;
+use App\Entity\User;
 use App\Repository\TaskRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class TaskService
 {
-    public function addTask(TaskPostRequestDto $taskPostRequestDto, EntityManagerInterface $entityManager): JsonResponse
+    public function addTask(TaskPostRequestDto $taskPostRequestDto, EntityManagerInterface $entityManager, User $user): JsonResponse
     {
         //date and time of the creation
         $createdAt = new \DateTimeImmutable();
@@ -26,6 +27,7 @@ class TaskService
         $task->setDeadline($taskPostRequestDto->getDeadline());
         $task->setCreatedAt($createdAt);
         $task->setUpdatedAt($createdAt);
+        $task->setUser($user);
 
         //save task to db
         $entityManager->persist($task);
@@ -39,9 +41,9 @@ class TaskService
         return new JsonResponse(["message" => "Task was not created due to a database error!"], 500);
     }
 
-    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer): JsonResponse
+    public function getTasks(TaskRepository $taskRepository, SerializerInterface $serializer, User $user): JsonResponse
     {
-        $tasks = $taskRepository->findby([], ['deadline' => 'DESC']);
+        $tasks = $taskRepository->findby(['user' => $user], ['deadline' => 'DESC']);
 
         if(empty($tasks)) {
             return new JsonResponse(["message" => "There are no tasks yet."], 404);
@@ -87,9 +89,9 @@ class TaskService
         return JsonConverter::jsonResponse($serializer, $taskResponseDtoArray, 200);
     }
 
-    public function deleteTask(TaskRepository $taskRepository, EntityManagerInterface $entityManager, $id): JsonResponse
+    public function deleteTask(TaskRepository $taskRepository, EntityManagerInterface $entityManager, $id, $user): JsonResponse
     {
-        $task = $taskRepository->findOneBy(['id' => $id]);
+        $task = $taskRepository->findOneBy(['id' => $id, "user" => $user]);
 
         if(empty($task)) {
             return new JsonResponse(["message" => "Task not found!"], 404);
@@ -106,9 +108,10 @@ class TaskService
         return new JsonResponse(["message" => "Task was not deleted due to a database error!"], 500);
     }
 
-    public function editTask(TaskRepository $taskRepository, EntityManagerInterface $entityManager, TaskPutRequestDto $taskPutRequestDto, $id): JsonResponse
+    public function editTask(TaskRepository $taskRepository, EntityManagerInterface $entityManager,
+                             TaskPutRequestDto $taskPutRequestDto, $id, User $user): JsonResponse
     {
-        $task = $taskRepository->findOneBy(["id" => $id]);
+        $task = $taskRepository->findOneBy(["id" => $id, "user" => $user]);
         //Today's date
         $date = new \DateTimeImmutable();
 
