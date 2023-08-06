@@ -12,6 +12,10 @@
 6. Clear error messages and status codes handling.
 7. Documentation of the application using Swagger.
 
+**Swagger Live Documentation:**
+
+https://editor.swagger.io/?url=https://raw.githubusercontent.com/raczmarco3/Task-Manager-API/main/documentation/task_manager_api_swagger_documentation.yaml
+
 # Installation
 1. console: git clone https://github.com/raczmarco3/Task-Manager-API.git
 2. console: cd Task-Manager-API
