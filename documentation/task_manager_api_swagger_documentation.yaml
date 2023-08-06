@@ -137,8 +137,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/MessageOne'
-                  - $ref: '#/components/schemas/MessageTwo'
+                  - $ref: '#/components/schemas/Message'
+                  - $ref: '#/components/schemas/Message'
               examples:
                 deadline:
                   summary: Wrong deadline
@@ -276,8 +276,8 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/MessageOne'
-                  - $ref: '#/components/schemas/MessageTwo'
+                  - $ref: '#/components/schemas/Message'
+                  - $ref: '#/components/schemas/Message'
               examples:
                 parameters:
                   summary: Wrong id
@@ -305,12 +305,7 @@ paths:
                 message: You are not authorized to do this action!
 components:
   schemas:
-    MessageOne:
-      type: object
-      properties:
-        message:
-          type: string
-    MessageTwo:
+    Message:
       type: object
       properties:
         message:
