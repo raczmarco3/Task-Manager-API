@@ -58,6 +58,18 @@ class TaskController extends AbstractController
         return $taskService->getTasks($taskRepository, $serializer);
     }
 
+    /**
+     * @Route("/delete/{id}", methods={"DELETE"})
+     */
+    public function deleteTask($id, EntityManagerInterface $entityManager, TaskRepository $taskRepository, TaskService $taskService): JsonResponse
+    {
+        if(!is_numeric($id)) {
+            return new JsonResponse(["message" => "id must be a number!"], 400);
+        }
+
+        return $taskService->deleteTask($taskRepository, $entityManager, $id);
+    }
+
     public function printValidationErrors($errors, $serializer)
     {
         $formatedViolationList = [];

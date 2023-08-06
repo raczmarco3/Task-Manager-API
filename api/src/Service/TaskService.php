@@ -83,4 +83,23 @@ class TaskService
 
         return JsonConverter::jsonResponse($serializer, $taskResponseDtoArray, 200);
     }
+
+    public function deleteTask(TaskRepository $taskRepository ,EntityManagerInterface $entityManager, $id): JsonResponse
+    {
+        $task = $taskRepository->findOneBy(['id' => $id]);
+
+        if(empty($task)) {
+            return new JsonResponse(["message" => "Task not found!"], 404);
+        }
+
+        $entityManager->remove($task);
+        $entityManager->flush();
+
+        //check if task was deleted
+        if(!is_numeric($task->getId())) {
+            return new JsonResponse(["message" => "Task deleted."], 200);
+        }
+
+        return new JsonResponse(["message" => "Task was not deleted due to a database error!"], 500);
+    }
 }
