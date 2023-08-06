@@ -10,6 +10,7 @@ class TaskResponseDto
     private \DateTimeImmutable $deadline;
     private bool $closeDeadline;
     private bool $expired;
+    private \DateTimeImmutable $updatedAt;
 
     /**
      * @return int
@@ -105,5 +106,21 @@ class TaskResponseDto
     public function setExpired(bool $expired): void
     {
         $this->expired = $expired;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt->format('Y-m-d H:i');
+    }
+
+    /**
+     * @param \DateTimeImmutable $updatedAt
+     */
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 }

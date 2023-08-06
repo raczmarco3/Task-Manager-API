@@ -4,7 +4,7 @@ namespace App\Dto\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class TaskRequestDto
+class TaskPostRequestDto
 {
     #[Assert\NotBlank]
     #[Assert\Length(
@@ -52,9 +52,6 @@ class TaskRequestDto
         $this->description = $description;
     }
 
-    /**
-     * @return string
-     */
     public function getDeadline(): \DateTimeImmutable
     {
         return new \DateTimeImmutable($this->deadline);
